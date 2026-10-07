@@ -1,0 +1,40 @@
+version: 1
+
+hosts:
+  - name: host-1
+    mode: remote
+    url: http://192.0.2.10:2380
+
+  - name: host-2
+    mode: remote
+    url: http://192.0.2.11:2380
+
+  - name: host-3
+    mode: remote
+    url: http://192.0.2.12:2380
+
+  - name: host-4
+    mode: remote
+    url: http://192.0.2.13:2380
+
+ntfy:
+  enabled: true
+  topic: docker-health
+  timeout_seconds: 10
+  cooldown_seconds: 900
+
+options:
+  timeout_seconds: 10
+  max_parallel: 4
+  include_stopped: true
+  alert_min_duration: 30m
+
+  alert_rules:
+    unhealthy: critical
+    restarting: critical
+    dead: critical
+    exited_error: warning
+    paused: warning
+    unknown: warning
+
+  monitor_interval_seconds: 300
