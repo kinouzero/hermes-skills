@@ -96,9 +96,6 @@ def validate_config(config):
         if not os.environ.get("NTFY_TOKEN"):
             fail("Configuration ntfy invalide: NTFY_TOKEN est absente")
 
-    options = config.get("options") or {}
-    if not isinstance(options, dict):
-        fail("Configuration invalide: options doit être un objet")
     try:
         timeout = float(options.get("timeout_seconds", 10))
         max_parallel = int(options.get("max_parallel", len(hosts)))
@@ -2270,8 +2267,7 @@ def ntfy_event_text(item):
         message = "Problème résolu"
 
     lines = [message, f"Hôte: {host}", f"Container: {name}", f"Stack: {project}", f"Service: {service}"]
-    if classification:
-        lines.append(f"État: {classification}")
+    lines.append(f"État: {classification}")
     duration = alert.get("duration_seconds")
     if duration is not None:
         lines.append(f"Durée: {format_duration(duration)}")

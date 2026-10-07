@@ -269,7 +269,7 @@ python3 -m venv .venv
 
 This environment is for repository development. Installed skills continue to use the Hermes Python interpreter documented in their `SKILL.md`.
 
-The [GitHub Actions test workflow](.github/workflows/tests.yml) runs on every push and pull request, and can also be started manually. It uses Python 3.12 on Ubuntu 24.04, installs the pinned development dependencies, and runs the full test suite with line and branch coverage reported in the job logs. CI requires at least 80% combined line and branch coverage. No infrastructure credentials are required.
+The [GitHub Actions test workflow](.github/workflows/tests.yml) runs on every push and pull request, and can also be started manually. It uses Python 3.12 on Ubuntu 24.04, installs the pinned development dependencies, and runs the full test suite with line and branch coverage reported in the job logs. CI requires 100% line and branch coverage for both skill scripts. No infrastructure credentials are required.
 
 The tests cover Docker health classification and collection, snapshot persistence and recovery, alert thresholds, silences, ntfy delivery, WUD/Komodo stack matching, version policies, Compose preparation, rollback, locks, and verified deployment guards. They also parse the YAML metadata and validate every documented CLI example against the scripts' argument parsers.
 
@@ -278,7 +278,7 @@ Tests use temporary state files and fake credentials. External service responses
 To measure line and branch coverage:
 
 ```bash
-.venv/bin/python -m pytest --cov=docker-health/v1.0.0/scripts --cov=docker-updater/v1.0.0/scripts --cov-branch --cov-report=term-missing --cov-fail-under=80
+.venv/bin/python -m pytest --cov=docker-health/v1.0.0/scripts --cov=docker-updater/v1.0.0/scripts --cov-branch --cov-report=term-missing --cov-fail-under=100
 ```
 
 ---

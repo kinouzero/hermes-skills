@@ -478,9 +478,8 @@ def _http_request_json(
     import urllib.error
     import urllib.request
 
-    last_error = None
-
-    for attempt in range(HTTP_RETRIES + 1):
+    attempt = 0
+    while True:
         try:
             with urllib.request.urlopen(
                 request,
@@ -507,7 +506,7 @@ def _http_request_json(
             )
 
         if attempt >= HTTP_RETRIES:
-            break
+            raise last_error
 
         delay = min(
             HTTP_RETRY_BASE_DELAY * (2 ** attempt),
@@ -518,8 +517,7 @@ def _http_request_json(
             file=sys.stderr,
         )
         time.sleep(delay)
-
-    raise last_error or RuntimeError(f"Erreur {service_name}: requête échouée")
+        attempt += 1
 
 
 def komodo_request(
@@ -719,8 +717,6 @@ def find_komodo_stack(
     wud_server = wud_server.strip() if isinstance(wud_server, str) else ""
 
     def has_service(stack: Dict[str, Any]) -> bool:
-        if not wud_service:
-            return False
         return any(
             service.get("service") == wud_service
             for service in stack_services(stack)
@@ -1897,12 +1893,11 @@ def emit_deploy_log(
     text = stderr.strip() or stdout.strip()
     if text:
         lines = [line.strip() for line in text.splitlines() if line.strip()]
-        if lines:
-            print(
-                f"   {lines[-1][:500]}",
-                file=sys.stderr,
-                flush=True,
-            )
+        print(
+            f"   {lines[-1][:500]}",
+            file=sys.stderr,
+            flush=True,
+        )
 
 
 def follow_stack_deploy(
@@ -3950,16 +3945,7 @@ def main():
                 print_json(summary)
             return
 
-        if args.command == "preflight":
-
-            print_json(
-                preflight()
-            )
-
-            return
-
         if args.command == "deploy":
-
             print_json(
                 deploy_stacks(
                     args.confirm,
@@ -3973,10 +3959,10 @@ def main():
                     lock_timeout=args.lock_timeout,
                 )
             )
-
             return
 
-        parser.print_help()
+        # All other required subcommands have returned; preflight is the final choice.
+        print_json(preflight())
 
     except KeyboardInterrupt:
 

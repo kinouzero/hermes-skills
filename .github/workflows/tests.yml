@@ -43,4 +43,4 @@ jobs:
           --cov=docker-updater/v1.0.0/scripts
           --cov-branch
           --cov-report=term-missing
-          --cov-fail-under=80
+          --cov-fail-under=100
