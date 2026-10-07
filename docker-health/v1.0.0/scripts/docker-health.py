@@ -925,6 +925,8 @@ def events_from_changes(changes_data):
                 "id": change.get("id"),
                 "from": change.get("from"),
                 "to": change.get("to"),
+                "classification": change.get("to"),
+                "compose": (change.get("after") or {}).get("compose") or {},
                 "duration_seconds": duration,
             })
         elif ctype == "restart_state_changed":
@@ -949,6 +951,7 @@ def events_from_changes(changes_data):
                 "name": c.get("name"),
                 "id": c.get("id"),
                 "classification": c.get("classification"),
+                "compose": c.get("compose") or {},
             })
     return events
 
@@ -1766,7 +1769,7 @@ def _diagnostic_identity(c):
 
 def _event_container_name(event):
     alert = event.get("alert") or event.get("after") or event.get("before") or {}
-    return alert.get("name") or event.get("container")
+    return alert.get("name") or event.get("name") or event.get("container")
 
 
 def _event_compose(event):
