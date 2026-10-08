@@ -58,7 +58,7 @@ HISTORY_FILE = os.getenv(
 )
 LOCK_FILE = os.getenv(
     "DOCKER_UPDATER_LOCK",
-    "/opt/data/.hermes/skills/docker-updater/.lock",
+    "/opt/data/.hermes/data/docker-updater/.lock",
 )
 HISTORY_LIMIT = 500
 
@@ -562,12 +562,17 @@ def wud_request(
 # ============================================================
 
 def list_stacks() -> List[Dict[str, Any]]:
+    """Récupère toutes les stacks Komodo, sans les templates."""
 
     response = komodo_request(
         "/read",
         {
             "type": "ListStacks",
-            "params": {},
+            "params": {
+                "query": {"templates": "Exclude"},
+                # Komodo: 0 désactive la limite de pagination du serveur.
+                "limit": 0,
+            },
         },
     )
 
@@ -583,7 +588,8 @@ def list_stacks() -> List[Dict[str, Any]]:
             f"{type(response).__name__}"
         )
 
-    return response
+    # Exclusion locale également si le serveur renvoie des templates.
+    return [stack for stack in response if not stack.get("template", False)]
 
 
 def get_stack(

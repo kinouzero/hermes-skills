@@ -288,3 +288,38 @@ def test_missing_komodo_credentials_fail_before_network(updater, monkeypatch, ca
     assert "KOMODO_API_SECRET" in output
     assert "test-key" not in output
     assert "test-password" not in output
+
+
+@pytest.mark.parametrize("stack_count", [0, 49, 50, 51, 125])
+def test_list_stacks_excludes_templates_without_truncation(updater, monkeypatch, stack_count):
+    stacks = [{"id": f"s{i}", "name": f"stack-{i:03}", "template": False}
+              for i in range(stack_count)]
+    templates = [{"id": f"t{i}", "name": f"template-{i}", "template": True}
+                 for i in range(3)]
+
+    def api(endpoint, payload):
+        assert endpoint == "/read"
+        assert payload["type"] == "ListStacks"
+        params = payload["params"]
+        assert params.get("query", {}).get("templates") == "Exclude"
+        resources = templates + stacks
+        if params.get("query", {}).get("templates") == "Exclude":
+            resources = [item for item in resources if not item["template"]]
+        limit = params.get("limit", 50)
+        return resources if limit == 0 else resources[:limit]
+
+    monkeypatch.setattr(updater, "komodo_request", api)
+    assert updater.list_stacks() == stacks
+
+
+def test_list_stacks_filters_templates_returned_by_server(updater, komodo_api):
+    stacks = [{"id": "s1", "template": False}, {"id": "s2"}]
+    komodo_api.return_value = [stacks[0], {"id": "t1", "template": True}, stacks[1]]
+    assert updater.list_stacks() == stacks
+
+
+@pytest.mark.parametrize("response", [None, {}, {"stacks": []}])
+def test_list_stacks_rejects_unexpected_response(updater, komodo_api, response):
+    komodo_api.return_value = response
+    with pytest.raises(RuntimeError, match="ListStacks: réponse inattendue"):
+        updater.list_stacks()
