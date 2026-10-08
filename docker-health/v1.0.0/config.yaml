@@ -3,19 +3,11 @@ version: 1
 hosts:
   - name: host-1
     mode: remote
-    url: http://192.0.2.10:2380
+    url: http://192.0.2.10:2375
 
   - name: host-2
     mode: remote
-    url: http://192.0.2.11:2380
-
-  - name: host-3
-    mode: remote
-    url: http://192.0.2.12:2380
-
-  - name: host-4
-    mode: remote
-    url: http://192.0.2.13:2380
+    url: http://192.0.2.11:2375
 
 ntfy:
   enabled: true
